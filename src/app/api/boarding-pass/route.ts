@@ -5,7 +5,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { generateBoardingPassPDF } = await import('@/lib/pdf');
 
-    const pdfBuffer = await generateBoardingPassPDF({
+    const pdfData = await generateBoardingPassPDF({
       pnr: body.pnr,
       passengerName: body.passengerName,
       airlineName: body.airlineName,
@@ -20,10 +20,12 @@ export async function POST(req: NextRequest) {
       travelClass: body.travelClass,
     });
 
-    return new NextResponse(pdfBuffer, {
+    return new Response(pdfData, {
+      status: 200,
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="boarding-pass-${body.pnr}.pdf"`,
+        'Content-Length': pdfData.length.toString(),
       },
     });
   } catch (error) {
