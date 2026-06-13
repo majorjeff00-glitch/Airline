@@ -4,8 +4,27 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Plus, Edit, XCircle, Plane } from 'lucide-react';
-import { getAirlineColor, getStatusColor } from '@/lib/utils';
+import { Plus, Edit3, XCircle, Plane } from 'lucide-react';
+
+function getAirlineTag(airline: string): string {
+  const colors: Record<string, string> = {
+    'demo airways': 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
+    'fastjet': 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300',
+    'skylink': 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300',
+  };
+  return colors[airline.toLowerCase()] || 'bg-gray-100 text-gray-800 dark:bg-gray-700';
+}
+
+function getStatusBadge(status: string): string {
+  const map: Record<string, string> = {
+    SCHEDULED: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
+    DELAYED: 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300',
+    BOARDING: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
+    DEPARTED: 'bg-gray-100 text-gray-800 dark:bg-gray-700',
+    CANCELLED: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300',
+  };
+  return map[status] || 'bg-gray-100 text-gray-800';
+}
 
 export default function AdminFlightsPage() {
   const { data: session, status } = useSession();
@@ -14,54 +33,26 @@ export default function AdminFlightsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (status === 'unauthenticated' || (status === 'authenticated' && user?.role !== 'ADMIN')) {
-      redirect('/login');
-    }
+    if (status === 'unauthenticated' || (status === 'authenticated' && user?.role !== 'ADMIN')) redirect('/login');
   }, [status, user]);
 
   useEffect(() => {
-    const loadFlights = async () => {
-      try {
-        const res = await fetch('/api/admin/flights');
-        if (res.ok) {
-          const data = await res.json();
-          setFlights(data);
-        }
-      } catch (error) {
-        console.error('Error loading flights:', error);
-      } finally {
-        setLoading(false);
-      }
+    const load = async () => {
+      const res = await fetch('/api/admin/flights');
+      if (res.ok) setFlights(await res.json());
+      setLoading(false);
     };
-    if (status === 'authenticated' && user?.role === 'ADMIN') {
-      loadFlights();
-    }
+    if (status === 'authenticated' && user?.role === 'ADMIN') load();
   }, [status, user]);
 
   const handleCancel = async (flightId: string) => {
     if (!confirm('Cancel this flight? All bookings will be cancelled and passengers notified.')) return;
-
-    try {
-      const res = await fetch(`/api/admin/flights/${flightId}`, { method: 'DELETE' });
-      if (res.ok) {
-        setFlights((prev) =>
-          prev.map((f) => (f.id === flightId ? { ...f, status: 'CANCELLED' } : f))
-        );
-      }
-    } catch (error) {
-      console.error('Error cancelling flight:', error);
-    }
+    const res = await fetch(`/api/admin/flights/${flightId}`, { method: 'DELETE' });
+    if (res.ok) setFlights(prev => prev.map(f => f.id === flightId ? { ...f, status: 'CANCELLED' } : f));
   };
 
   if (status === 'loading' || loading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-muted rounded w-1/4" />
-          <div className="h-32 bg-muted rounded" />
-        </div>
-      </div>
-    );
+    return <div className="max-w-7xl mx-auto px-4 py-8"><div className="animate-pulse h-64 bg-muted rounded-2xl" /></div>;
   }
 
   const groupedByAirline = flights.reduce((acc: Record<string, any[]>, flight: any) => {
@@ -72,76 +63,70 @@ export default function AdminFlightsPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Manage Flights</h1>
-          <p className="text-muted-foreground">View all flights grouped by airline</p>
+          <h1 className="font-display text-2xl font-bold">Manage Flights</h1>
+          <p className="text-sm text-muted-foreground">All flights grouped by airline</p>
         </div>
-        <Link
-          href="/admin/flights/new"
-          className="bg-primary text-primary-foreground px-4 py-2 rounded-md font-medium hover:bg-primary/90 flex items-center gap-2"
-        >
+        <Link href="/admin/flights/new" className="btn-primary text-sm">
           <Plus className="h-4 w-4" /> Add Flight
         </Link>
       </div>
 
-      {Object.keys(groupedByAirline).length === 0 ? (
-        <div className="text-center py-12 border rounded-lg bg-card">
-          <Plane className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-          <h3 className="text-lg font-medium mb-2">No flights yet</h3>
-          <Link href="/admin/flights/new" className="text-primary hover:underline">Add your first flight</Link>
+      {flights.length === 0 ? (
+        <div className="text-center py-16 border rounded-2xl bg-card">
+          <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+            <Plane className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <h3 className="font-display text-lg font-semibold mb-2">No flights added yet</h3>
+          <Link href="/admin/flights/new" className="btn-primary"><Plus className="h-4 w-4" /> Add Flight</Link>
         </div>
       ) : (
         <div className="space-y-8">
           {Object.entries(groupedByAirline).map(([airline, airlineFlights]: [string, any]) => (
             <div key={airline}>
-              <h2 className={`inline-block px-3 py-1 rounded text-sm font-medium mb-4 ${getAirlineColor(airline)}`}>
-                {airline} ({(airlineFlights as any[]).length} flights)
-              </h2>
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
+              <div className="flex items-center gap-2 mb-4">
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getAirlineTag(airline)}`}>{airline}</span>
+                <span className="text-xs text-muted-foreground">({airlineFlights.length} flights)</span>
+              </div>
+              <div className="overflow-x-auto rounded-xl border">
+                <table className="w-full">
                   <thead>
-                    <tr className="border-b text-sm text-muted-foreground">
-                      <th className="text-left py-3 px-4">Flight</th>
-                      <th className="text-left py-3 px-4">Route</th>
-                      <th className="text-left py-3 px-4">Departure</th>
-                      <th className="text-left py-3 px-4">Seats</th>
-                      <th className="text-left py-3 px-4">Status</th>
-                      <th className="text-left py-3 px-4">Bookings</th>
-                      <th className="text-right py-3 px-4">Actions</th>
+                    <tr className="bg-muted/50 text-xs text-muted-foreground uppercase tracking-wider">
+                      <th className="text-left py-3 px-4 font-medium">Flight</th>
+                      <th className="text-left py-3 px-4 font-medium">Route</th>
+                      <th className="text-left py-3 px-4 font-medium">Departure</th>
+                      <th className="text-left py-3 px-4 font-medium">Seats (E/B/F)</th>
+                      <th className="text-left py-3 px-4 font-medium">Status</th>
+                      <th className="text-left py-3 px-4 font-medium">Bookings</th>
+                      <th className="text-right py-3 px-4 font-medium">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {(airlineFlights as any[]).map((flight: any) => (
-                      <tr key={flight.id} className="border-b hover:bg-accent/50">
+                    {airlineFlights.map((flight: any) => (
+                      <tr key={flight.id} className="border-t hover:bg-accent/30 transition-colors">
                         <td className="py-3 px-4 font-medium">{flight.flightNumber}</td>
-                        <td className="py-3 px-4">{flight.origin} → {flight.destination}</td>
-                        <td className="py-3 px-4 text-sm">
-                          {new Date(flight.departureTime).toLocaleDateString()}{' '}
-                          {new Date(flight.departureTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                        <td className="py-3 px-4 text-sm">{flight.origin} → {flight.destination}</td>
+                        <td className="py-3 px-4 text-sm whitespace-nowrap">
+                          {new Date(flight.departureTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}{' '}
+                          {new Date(flight.departureTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}
                         </td>
-                        <td className="py-3 px-4 text-sm">
-                          E:{flight.economySeats} B:{flight.businessSeats} F:{flight.firstSeats}
+                        <td className="py-3 px-4 text-sm text-muted-foreground">
+                          {flight.economySeats}/{flight.businessSeats}/{flight.firstSeats}
                         </td>
                         <td className="py-3 px-4">
-                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(flight.status)}`}>
+                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(flight.status)}`}>
                             {flight.status}
                           </span>
                         </td>
                         <td className="py-3 px-4 text-sm">{flight._count?.bookings || 0}</td>
                         <td className="py-3 px-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <Link
-                              href={`/admin/flights/${flight.id}/edit`}
-                              className="p-1.5 rounded-md hover:bg-accent"
-                            >
-                              <Edit className="h-4 w-4" />
+                          <div className="flex items-center justify-end gap-1">
+                            <Link href={`/admin/flights/${flight.id}/edit`} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-accent transition-colors" aria-label="Edit flight">
+                              <Edit3 className="h-4 w-4" />
                             </Link>
                             {flight.status !== 'CANCELLED' && (
-                              <button
-                                onClick={() => handleCancel(flight.id)}
-                                className="p-1.5 rounded-md hover:bg-destructive/10 text-destructive"
-                              >
+                              <button onClick={() => handleCancel(flight.id)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-muted-foreground hover:text-status-cancelled transition-colors" aria-label="Cancel flight">
                                 <XCircle className="h-4 w-4" />
                               </button>
                             )}
