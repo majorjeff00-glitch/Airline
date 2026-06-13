@@ -1,0 +1,138 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  PASSENGER
+  AGENT
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CHECKED_IN
+  BOARDED
+  CANCELLED
+  NO_SHOW
+}
+
+enum TravelClass {
+  ECONOMY
+  BUSINESS
+  FIRST
+}
+
+enum FlightStatus {
+  SCHEDULED
+  DELAYED
+  BOARDING
+  DEPARTED
+  CANCELLED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  role         UserRole @default(PASSENGER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  bookings         Booking[]
+  notificationLogs NotificationLog[]
+}
+
+model Flight {
+  id              String       @id @default(cuid())
+  airlineName     String
+  flightNumber    String
+  origin          String
+  destination     String
+  departureTime   DateTime
+  arrivalTime     DateTime
+  durationMinutes Int
+  economySeats    Int
+  businessSeats   Int
+  firstSeats      Int
+  economyPrice    Float
+  businessPrice   Float
+  firstPrice      Float
+  status          FlightStatus @default(SCHEDULED)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  bookings Booking[]
+
+  @@index([airlineName, flightNumber])
+  @@index([origin, destination])
+  @@index([departureTime])
+}
+
+model Booking {
+  id                 String        @id @default(cuid())
+  pnr                String        @unique
+  userId             String?
+  flightId           String
+  status             BookingStatus @default(PENDING)
+  totalPrice         Float
+  cancellationRefund Float         @default(0)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  user             User?            @relation(fields: [userId], references: [id])
+  flight           Flight           @relation(fields: [flightId], references: [id])
+  passengers       PassengerDetail[]
+  payment          Payment?
+  notificationLogs NotificationLog[]
+
+  @@index([pnr])
+  @@index([userId])
+  @@index([flightId])
+  @@index([status])
+}
+
+model PassengerDetail {
+  id              String     @id @default(cuid())
+  bookingId       String
+  fullName        String
+  dateOfBirth     DateTime
+  passportNumber  String?
+  seatNumber      String?
+  travelClass     TravelClass @default(ECONOMY)
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+
+  @@index([bookingId])
+}
+
+model Payment {
+  id            String   @id @default(cuid())
+  bookingId     String   @unique
+  amount        Float
+  status        String   @default("COMPLETED")
+  transactionId String   @unique
+  createdAt     DateTime @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id])
+}
+
+model NotificationLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  bookingId String?
+  type      String
+  sentAt    DateTime @default(now())
+
+  user    User?    @relation(fields: [userId], references: [id])
+  booking Booking? @relation(fields: [bookingId], references: [id])
+
+  @@index([userId])
+  @@index([bookingId])
+}
