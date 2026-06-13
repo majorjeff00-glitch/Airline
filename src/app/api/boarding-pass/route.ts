@@ -20,12 +20,12 @@ export async function POST(req: NextRequest) {
       travelClass: body.travelClass,
     });
 
-    return new Response(pdfData, {
+    // @ts-ignore - NextResponse accepts Buffer for binary data
+    return new NextResponse(pdfData, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="boarding-pass-${body.pnr}.pdf"`,
-        'Content-Length': pdfData.length.toString(),
       },
     });
   } catch (error) {

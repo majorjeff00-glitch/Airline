@@ -13,7 +13,7 @@ export async function generateBoardingPassPDF(data: {
   gate: string;
   boardingTime: string;
   travelClass: string;
-}): Promise<Buffer> {
+}): Promise<Uint8Array> {
   const doc = new jsPDF({
     orientation: 'landscape',
     unit: 'mm',
@@ -74,5 +74,6 @@ export async function generateBoardingPassPDF(data: {
   doc.setFontSize(6);
   doc.text('This is a simulated boarding pass for demonstration purposes.', pageWidth - 100, 74);
 
-  return Buffer.from(doc.output('arraybuffer'));
+  const buffer = Buffer.from(doc.output('arraybuffer'));
+  return new Uint8Array(buffer);
 }

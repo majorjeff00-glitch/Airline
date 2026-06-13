@@ -105,7 +105,7 @@ export default function HomePage() {
     );
   };
 
-  const uniqueAirlines = [...new Set(results.map(r => r.airlineName))];
+  const uniqueAirlines = Array.from(new Set(results.map(r => r.airlineName)));
 
   return (
     <div>

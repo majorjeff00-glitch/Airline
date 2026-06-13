@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { CheckCircle, Plane, Download, ArrowRight, Mail } from 'lucide-react';
+import { CheckCircle, Plane, Download, ArrowRight, Mail, ArrowLeft } from 'lucide-react';
 
 function getAirlineColor(airline: string): string {
   const colors: Record<string, string> = {
