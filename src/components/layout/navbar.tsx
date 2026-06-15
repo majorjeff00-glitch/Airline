@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useSession, signOut } from 'next-auth/react';
 import { useTheme } from 'next-themes';
 import { useState, useEffect } from 'react';
-import { Plane, Sun, Moon, Menu, X, User, LogOut, LayoutDashboard, Search, ClipboardList, Ticket } from 'lucide-react';
+import { Sun, Moon, Menu, X, User, LogOut, LayoutDashboard, Search, ClipboardList, Ticket } from 'lucide-react';
 
 export function Navbar() {
   const { data: session, status } = useSession();
@@ -36,11 +37,15 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center gap-2 font-display font-bold text-lg">
-              <div className="w-8 h-8 rounded-lg bg-brand-primary flex items-center justify-center">
-                <Plane className="h-4 w-4 text-white" />
-              </div>
-              <span className="hidden sm:inline">SkyBook</span>
+            <Link href="/" className="flex items-center gap-2">
+              <Image
+                src="/logo.png"
+                alt="SkyBook"
+                width={130}
+                height={36}
+                className="h-9 w-auto"
+                priority
+              />
             </Link>
             <div className="hidden md:flex items-center gap-1">
               {navLinks.map((link) => (

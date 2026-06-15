@@ -110,18 +110,36 @@ export default function HomePage() {
   return (
     <div>
       {!searched ? (
-        <div className="hero-gradient min-h-[calc(100vh-64px)] flex flex-col">
-          <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
-            <div className="text-center mb-8 max-w-2xl">
-              <h1 className="font-display text-4xl md:text-5xl font-extrabold text-white text-balance leading-tight mb-4">
-                Fly Anywhere.<br />Book Everything.
+        <div className="relative min-h-[calc(100vh-64px)] flex flex-col overflow-hidden">
+          <div
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+            style={{ backgroundImage: `url('/brand design.png')` }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0f172a]/85 via-[#0f172a]/50 to-[#0f172a]/90" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a]/60 via-transparent to-[#0f172a]/30" />
+
+          <div className="absolute -top-40 -right-40 w-[500px] h-[500px] bg-brand-primary/15 rounded-full blur-[120px]" />
+          <div className="absolute -bottom-40 -left-40 w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-[100px]" />
+          <div className="absolute top-1/3 left-[10%] opacity-[0.06] animate-float">
+            <Plane className="h-24 w-24 text-white" />
+          </div>
+
+          <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-12">
+            <div className="text-center mb-10 max-w-3xl">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-blue-200 text-xs font-medium mb-6">
+                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                All airlines, one platform
+              </div>
+              <h1 className="font-display text-5xl md:text-7xl font-extrabold text-white text-balance leading-[1.1] mb-4 tracking-tight">
+                Fly Beyond<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-cyan-300">Limits</span>
               </h1>
-              <p className="text-lg text-blue-200/80 text-balance">
-                Search and book flights from Delta, Emirates, FastJet, SkyLink, and more — all in one place.
+              <p className="text-lg md:text-xl text-blue-200/70 text-balance max-w-2xl mx-auto">
+                Search, compare, and book flights from Delta, Emirates, FastJet, and more — all in one seamless experience.
               </p>
             </div>
 
-            <div className="glass-card w-full max-w-4xl p-6 md:p-8">
+            <div className="glass-card w-full max-w-4xl p-6 md:p-8 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
               <div className="flex gap-2 mb-6">
                 {['One Way', 'Round Trip', 'Multi-City'].map((tab, i) => (
                   <button
@@ -250,7 +268,7 @@ export default function HomePage() {
                 { icon: Ticket, title: 'Instant PNR', desc: 'Get your unique booking code immediately' },
                 { icon: Clock, title: 'Live Status Tracking', desc: 'Track any flight by airline + number' },
               ].map((feature) => (
-                <div key={feature.title} className="flex items-start gap-3 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10">
+                <div key={feature.title} className="flex items-start gap-3 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 transition-all duration-300 hover:bg-white/10 hover:-translate-y-0.5">
                   <div className="w-10 h-10 rounded-lg bg-brand-light/20 flex items-center justify-center flex-shrink-0">
                     <feature.icon className="h-5 w-5 text-blue-300" />
                   </div>
@@ -263,10 +281,10 @@ export default function HomePage() {
             </div>
 
             <div className="mt-8 flex gap-4">
-              <Link href="/track" className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white text-sm font-medium hover:bg-white/20 transition-all">
+              <Link href="/track" className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white text-sm font-medium hover:bg-white/20 hover:-translate-y-0.5 transition-all duration-200">
                 <Ticket className="h-4 w-4" /> Track by PNR
               </Link>
-              <Link href="/flight-status" className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white text-sm font-medium hover:bg-white/20 transition-all">
+              <Link href="/flight-status" className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 border border-white/20 text-white text-sm font-medium hover:bg-white/20 hover:-translate-y-0.5 transition-all duration-200">
                 <Plane className="h-4 w-4" /> Flight Status
               </Link>
             </div>

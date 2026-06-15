@@ -6,6 +6,14 @@ import { Navbar } from '@/components/layout/navbar';
 export const metadata: Metadata = {
   title: 'SkyBook — Multi-Airline Ticket Booking',
   description: 'Search, book, and track flights from multiple airlines in one place',
+  icons: {
+    icon: [
+      { url: '/favicon_io/favicon.ico', sizes: 'any' },
+      { url: '/favicon_io/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon_io/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: { url: '/favicon_io/apple-touch-icon.png' },
+  },
 };
 
 export default function RootLayout({
